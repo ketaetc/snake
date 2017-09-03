@@ -4,6 +4,7 @@ target/
 .idea/
 */target
 */.idea
+*/META-INF
 
 # Package Files #
 *.jar
