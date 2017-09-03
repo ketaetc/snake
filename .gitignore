@@ -1,0 +1,12 @@
+# Directories
+out/
+target/
+.idea/
+*/target
+*/.idea
+
+# Package Files #
+*.jar
+
+# other
+*.iml
