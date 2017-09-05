@@ -9,7 +9,7 @@ public enum Arguments {
 
     private String name;
 
-    private Arguments(String name) {
+    Arguments(String name) {
         this.name = name;
     }
 

@@ -6,7 +6,6 @@ import ru.dobrovolskyn.snake.game.model.Segment;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Random;
@@ -146,32 +145,11 @@ public class Snake extends GameObject {
     }
 
     public boolean isSnakeDead() {
-        int segmentWidth = SnakeGameModel.getCellWidth();
-//        int segmentWidth = (int)model.getPreferredSize().getWidth();
-        int segmentHeight = SnakeGameModel.getCellHeight();
-//        int segmentHeight = (int)model.getPreferredSize().getHeight();
-
-//        for (Segment segment : snakeCells) {
-//            Point p = segment.getLocation();
-//            if ((p.x < 0) || (p.x >= segmentWidth)) {
-////            if ((p.x < 0) || (p.x >= model.getPreferredSize().getWidth())) {
-//                return true;
-//            }
-//            if ((p.y < 0) || (p.y >= segmentHeight)) {
-////            if ((p.y < 0) || (p.y >= model.getPreferredSize().getHeight())) {
-//                return true;
-//            }
-//        }
-
         for (int i = 1; i < (getSnakeLength() - 1); i++) {
             Point s = snakeCells.get(i).getLocation();
-//            for (int j = (i + 1); j < getSnakeLength(); j++) {
-//                Point t = snakeCells.get(j).getLocation();
-//                if (s.equals(t)) {
-                if (s.equals(getSnakeHeadLocation())) {
-                    return true;
-                }
-//            }
+            if (s.equals(getSnakeHeadLocation())) {
+                return true;
+            }
         }
 
         return false;
@@ -204,10 +182,6 @@ public class Snake extends GameObject {
         this.running = running;
     }
 
-    public boolean isRunning() {
-        return running;
-    }
-
     @Override
     public void run() {
         while (running) {
@@ -215,13 +189,13 @@ public class Snake extends GameObject {
                 move();
 
                 if (this.isSnakeDead()) {
-                    makeGameStopped();
+                    makeStop();
                     model.setGameOver(true);
                 }
 
                 if (model.isGameStopped()) {
                     model.setGameActive(false);
-                    makeGameStopped();
+                    makeStop();
                 }
             }
 
@@ -229,31 +203,13 @@ public class Snake extends GameObject {
         }
     }
 
-    private void makeGameStopped() {
+    @Override
+    public void makeStop() {
         running = false;
-
-//        model.setGameOver(true);
-//        model.setGameActive(false);
 
         frame.getControlPanel().getStartButton().setEnabled(true);
         frame.getControlPanel().getPauseButton().setEnabled(false);
         frame.getControlPanel().getStopButton().setEnabled(false);
-    }
-
-    private void setScoreText() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                frame.setScoreText();
-            }
-        });
-    }
-
-    private void repaint() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                frame.repaintGridPanel();
-            }
-        });
     }
 
     private void sleep(long sleepTime) {

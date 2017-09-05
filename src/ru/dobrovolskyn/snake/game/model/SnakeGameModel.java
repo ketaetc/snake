@@ -37,15 +37,7 @@ public class SnakeGameModel {
         this.firstTimeSwitch = false;
         this.gameActive = false;
         this.gameOver = false;
-//        this.snake = new Snake(SNAKE_LENGTH);
-//        this.snake = set;
         this.random = new Random();
-
-//        for (int i = 0; i < FROGS_COUNT; i++) {
-//            double chance = random.nextDouble();
-//            Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
-//            this.frogList.add(frog);
-//        }
     }
 
     public static int getSquareWidth() {
@@ -101,17 +93,8 @@ public class SnakeGameModel {
                 Point point = snake.getRandomNonSnakeLocation();
                 Frog frog = Frog.createRandomFrog(point, chance);
                 frog.setName(SnakeGame.getFrogsThreadsCounter().addAndGet(1));
-//                addFrog(frog, frog.getName());
                 addFrog(frog, SnakeGame.getPool().submit(frog));
-
-//                SnakeGame.getPool().submit(frog);
             }
-
-//            new Thread(snake, "Snake:" + SnakeGame.getSnakeThreadsCounter().get()).start();
-//            snake.createSnake();
-
-//            setFrogsLocation();
-//            firstTimeSwitch = false;
         } else {
             firstTimeSwitch = true;
         }
@@ -157,30 +140,12 @@ public class SnakeGameModel {
         return score;
     }
 
-    public void setScore(int score) {
-        this.score = score;
-    }
-
     public void addScore(int score) {
         this.score += score;
     }
 
     public long getSleepTime() {
         return SNAKE_SLEEP;
-    }
-
-    public List<Frog> getFrogList() {
-        return frogList;
-    }
-
-    public void setFrogList(List<Frog> frogList) {
-        this.frogList = frogList;
-    }
-
-    public void setFrogsLocation() {
-        for (Frog frog : frogList) {
-            frog.setLocation(snake.getRandomNonSnakeLocation());
-        }
     }
 
     public Dimension getPreferredSize() {
@@ -194,17 +159,7 @@ public class SnakeGameModel {
         this.snake = snake;
     }
 
-    public void setFrogs() {
-        for (int i = 0; i < FROGS_COUNT; i++) {
-            double chance = random.nextDouble();
-            Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
-            this.frogList.add(frog);
-        }
-    }
-
-//    public void addFrog(Frog frog, String name) {
     public void addFrog(Frog frog, Future<?> future) {
-//        this.frogsMap.put(frog, name);
         this.frogsMap.put(frog, future);
     }
 
@@ -212,7 +167,6 @@ public class SnakeGameModel {
         this.frogsMap.remove(frog);
     }
 
-//    public Map<Frog, String> getFrogsMap() {
     public Map<Frog, Future<?>> getFrogsMap() {
         return frogsMap;
     }

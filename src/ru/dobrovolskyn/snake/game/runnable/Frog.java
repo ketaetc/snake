@@ -19,17 +19,6 @@ public class Frog extends GameObject {
     private volatile String name;
     private long moveTime;
 
-    public Frog(int x, int y, Color color, int points, long moveTime) {
-        this.running = true;
-        setLocation(x, y);
-        this.color = color;
-        this.points = points;
-        this.random = new Random();
-        this.model = SnakeGame.getSnakeGameModel();
-        this.frame = SnakeGame.getSnakeGameFrame();
-        this.moveTime = moveTime;
-    }
-
     public Frog(Point location, Color color, int points, long moveTime) {
         this.running = true;
         this.location = location;
@@ -131,10 +120,6 @@ public class Frog extends GameObject {
         this.location = location;
     }
 
-    public void setLocation(int x, int y) {
-        this.location = new Point(x, y);
-    }
-
     public int frogEaten(Point p) {
         if (p.equals(location)) {
             return points;
@@ -171,10 +156,7 @@ public class Frog extends GameObject {
                     setRunning(false);
 
                     model.removeFrog(this);
-//                    repaint();
-//                    model.addFrog(frog, frog.getName());
                     model.addFrog(frog, SnakeGame.getPool().submit(frog));
-//                    SnakeGame.getPool().submit(frog);
 
                     if (points == 1) {
                         model.getSnake().addSnakeTail(true);
@@ -182,7 +164,7 @@ public class Frog extends GameObject {
                         model.getSnake().addSnakeTail(false);
                     }
                 } else if (points < 0) {
-                    makeGameStopped();
+                    makeStop();
                     model.getSnake().setRunning(false);
                     model.setGameOver(true);
                 }
@@ -215,27 +197,13 @@ public class Frog extends GameObject {
         }
     }
 
-    private void repaint() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                frame.repaintGridPanel();
-            }
-        });
-    }
-
     public void setRunning(boolean running) {
         this.running = running;
     }
 
-    public boolean isRunning() {
-        return running;
-    }
-
-    private void makeGameStopped() {
+    @Override
+    public void makeStop() {
         running = false;
-
-//        model.setGameOver(true);
-//        model.setGameActive(false);
 
         frame.getControlPanel().getStartButton().setEnabled(true);
         frame.getControlPanel().getPauseButton().setEnabled(false);

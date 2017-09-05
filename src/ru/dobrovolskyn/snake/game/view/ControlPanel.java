@@ -80,9 +80,9 @@ public class ControlPanel {
         return pauseButton;
     }
 
-    public void setPauseButton(boolean selected) {
-        this.pauseButton.setSelected(selected);
-    }
+//    public void setPauseButton(boolean selected) {
+//        this.pauseButton.setSelected(selected);
+//    }
 
     public JButton getStartButton() {
         return startButton;
@@ -100,7 +100,7 @@ public class ControlPanel {
         return stopButton;
     }
 
-    public void setStopButton(JButton stopButton) {
-        this.stopButton = stopButton;
-    }
+//    public void setStopButton(JButton stopButton) {
+//        this.stopButton = stopButton;
+//    }
 }

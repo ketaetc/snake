@@ -51,13 +51,6 @@ public class GridPanel extends JPanel {
         });
     }
 
-//    @Override
-//    public void repaint(Rectangle r) {
-//        super.repaint(r);
-//
-//
-//    }
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -129,9 +122,6 @@ public class GridPanel extends JPanel {
     }
 
     private void drawFrog(Graphics2D g2d, int squareWidth) {
-//        List<? extends Frog> frogList = model.getFrogList();
-//        for (Frog frog : frogList) {
-//        Map<Frog, String> frogsMap = model.getFrogsMap();
         Map<Frog, Future<?>> frogsMap = model.getFrogsMap();
         for (Frog frog : frogsMap.keySet()) {
             Point p = frog.getLocation();

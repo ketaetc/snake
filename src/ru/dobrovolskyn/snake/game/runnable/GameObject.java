@@ -35,4 +35,6 @@ public abstract class GameObject implements Runnable {
 
         return newLocation;
     }
+
+    public abstract void makeStop();
 }

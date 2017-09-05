@@ -9,7 +9,7 @@ public enum FrogsMoveTime {
 
     private long moveTime;
 
-    private FrogsMoveTime(long moveTime) {
+    FrogsMoveTime(long moveTime) {
         this.moveTime = moveTime;
     }
 

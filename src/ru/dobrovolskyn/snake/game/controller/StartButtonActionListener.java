@@ -19,10 +19,6 @@ public class StartButtonActionListener implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         JButton button = (JButton) event.getSource();
         if (button.getModel().isArmed()) {
-//            model.setGameActive(false);
-
-//            frame.getGridPanel().repaint();
-
             frame.getControlPanel().getStartButton().setEnabled(false);
             frame.getControlPanel().getPauseButton().setEnabled(true);
             frame.getControlPanel().getStopButton().setEnabled(true);

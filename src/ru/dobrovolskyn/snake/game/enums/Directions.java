@@ -12,7 +12,7 @@ public enum Directions {
     private String name;
     private String character;
 
-    private Directions(Point direction, String name, String character) {
+    Directions(Point direction, String name, String character) {
         this.direction = direction;
         this.name = name;
         this.character = character;

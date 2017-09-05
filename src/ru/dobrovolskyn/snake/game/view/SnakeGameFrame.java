@@ -29,7 +29,7 @@ public class SnakeGameFrame {
     private void createPartControl() {
         frame = new JFrame();
         frame.setTitle("Snake");
-//        frame.setResizable(false);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -108,9 +108,9 @@ public class SnakeGameFrame {
         controlPanel.setScoreText(NF.format(model.getScore()));
     }
 
-    public void setPauseButton() {
-        controlPanel.setPauseButton(model.isGameActive());
-    }
+//    public void setPauseButton() {
+//        controlPanel.setPauseButton(model.isGameActive());
+//    }
 
     public ControlPanel getControlPanel() {
         return controlPanel;
@@ -120,7 +120,7 @@ public class SnakeGameFrame {
         return model;
     }
 
-    public GridPanel getGridPanel() {
-        return gridPanel;
-    }
+//    public GridPanel getGridPanel() {
+//        return gridPanel;
+//    }
 }

@@ -20,11 +20,6 @@ public class StopButtonActionListener implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         JButton button = (JButton) event.getSource();
         if (button.getModel().isArmed()) {
-//            model.setGameActive(false);
-//            model.setGameStopped(true);
-
-//            frame.repaintGridPanel();
-
             model.getSnake().setRunning(false);
             for (Frog frog : model.getFrogsMap().keySet()) {
                 frog.setRunning(false);

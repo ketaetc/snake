@@ -1,9 +1,9 @@
 package ru.dobrovolskyn.snake.game;
 
 import ru.dobrovolskyn.snake.game.enums.Arguments;
+import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.runnable.Snake;
-import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import javax.swing.*;
@@ -49,17 +49,11 @@ public class SnakeGame {
                     pool = Executors.newFixedThreadPool(frogsCount + 1);
                     snakeFuture = pool.submit(snake);
 
-//                    Thread thread = new Thread(snake, "Snake:" + snakeThreadsCounter.get());
-//                    thread.start();
-
-                    for (int i =0; i < frogsCount; i++) {
+                    for (int i = 0; i < frogsCount; i++) {
                         double chance = random.nextDouble();
                         Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
                         frog.setName(frogsThreadsCounter.addAndGet(1));
-//                        snakeGameModel.addFrog(frog, frog.getName());
                         snakeGameModel.addFrog(frog, pool.submit(frog));
-
-//                        pool.submit(frog);
                     }
                 }
             });
@@ -139,7 +133,6 @@ public class SnakeGame {
             SnakeGameModel.setFrogsCount(frogsCount);
             SnakeGameModel.setSnakeSleep(snakeSleep);
 
-//            return false;
             return true;
         }
         if (args.length != 0) {
@@ -180,6 +173,11 @@ public class SnakeGame {
                     frogsCount = 1;
                     System.out.println("Illegal value of frogs count parameter.");
                     System.out.println("Default value will be used: " + frogsCount);
+                }
+                if (snakeSleep < 500L) {
+                    snakeSleep = 500;
+                    System.out.println("Illegal value of frogs count parameter.");
+                    System.out.println("Default value will be used: " + snakeSleep);
                 }
 
                 SnakeGameModel.setCellHeight(gameBoardHeight);
