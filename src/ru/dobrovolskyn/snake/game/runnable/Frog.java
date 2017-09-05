@@ -1,6 +1,7 @@
-package ru.dobrovolskyn.snake.game.model;
+package ru.dobrovolskyn.snake.game.runnable;
 
 import ru.dobrovolskyn.snake.game.SnakeGame;
+import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import javax.swing.*;
@@ -8,7 +9,7 @@ import java.awt.*;
 import java.util.Random;
 
 public class Frog extends GameObject {
-    private Point location;
+    private volatile Point location;
     private Color color;
     private int points;
     private Random random;
@@ -16,8 +17,9 @@ public class Frog extends GameObject {
     private SnakeGameFrame frame;
     private SnakeGameModel model;
     private volatile String name;
+    private long moveTime;
 
-    public Frog(int x, int y, Color color, int points) {
+    public Frog(int x, int y, Color color, int points, long moveTime) {
         this.running = true;
         setLocation(x, y);
         this.color = color;
@@ -25,9 +27,10 @@ public class Frog extends GameObject {
         this.random = new Random();
         this.model = SnakeGame.getSnakeGameModel();
         this.frame = SnakeGame.getSnakeGameFrame();
+        this.moveTime = moveTime;
     }
 
-    public Frog(Point location, Color color, int points) {
+    public Frog(Point location, Color color, int points, long moveTime) {
         this.running = true;
         this.location = location;
         this.color = color;
@@ -35,6 +38,7 @@ public class Frog extends GameObject {
         this.random = new Random();
         this.model = SnakeGame.getSnakeGameModel();
         this.frame = SnakeGame.getSnakeGameFrame();
+        this.moveTime = moveTime;
     }
 
     public void setName(int num) {
@@ -43,6 +47,70 @@ public class Frog extends GameObject {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void move() {
+        double randomValue = random.nextDouble();
+        int generationCounter = 0;
+        boolean interrupted = false;
+
+        Point direction = generateNewPoint(randomValue);
+        int x = location.x + direction.x;
+        int y = location.y + direction.y;
+        Point newLocation = new Point(x, y);
+
+        while (checkCollision(newLocation)) {
+            if (generationCounter >= 10) {
+                interrupted = true;
+                break;
+            }
+            randomValue = random.nextDouble();
+
+            direction = generateNewPoint(randomValue);
+            x = location.x + direction.x;
+            y = location.y + direction.y;
+            newLocation = new Point(x, y);
+
+            generationCounter++;
+        }
+
+        if (!interrupted) {
+            newLocation = makeTransfer(location, direction);
+
+            setLocation(newLocation);
+        }
+    }
+
+    private Point generateNewPoint(double randomValue) {
+        int x = 0;
+        int y = 0;
+
+        int delta = random.nextInt(2) - 1;
+        if (delta == 0) {
+            delta = random.nextInt(2) - 1;
+        }
+        if (randomValue >= 0.5) {
+            x = delta;
+        } else {
+            y = delta;
+        }
+
+        return new Point(x, y);
+    }
+
+    private boolean checkFrogsCollision(Point newLocation) {
+        for (Frog frog : model.getFrogsMap().keySet()) {
+            if (frog.location.equals(newLocation)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkCollision(Point newLocation) {
+        return (model.getSnake().isSnakeLocation(newLocation) || checkFrogsCollision(newLocation));
     }
 
     public static Frog createRandomFrog(Point randomNonSnakeLocation, double chance) {
@@ -81,9 +149,14 @@ public class Frog extends GameObject {
 
     @Override
     public void run() {
-        System.out.println("running:    " + getName());
         long sleepTime = model.getSleepTime();
+        long startTime = 0;
+        long endTime;
         while (running) {
+            if (startTime == 0) {
+                startTime = System.currentTimeMillis();
+            }
+
             if (model.isGameActive()) {
                 int points = this.frogEaten(model.getSnake().getSnakeHeadLocation());
 
@@ -98,9 +171,10 @@ public class Frog extends GameObject {
                     setRunning(false);
 
                     model.removeFrog(this);
-                    repaint();
-                    model.addFrog(frog, frog.getName());
-                    SnakeGame.getPool().execute(frog);
+//                    repaint();
+//                    model.addFrog(frog, frog.getName());
+                    model.addFrog(frog, SnakeGame.getPool().submit(frog));
+//                    SnakeGame.getPool().submit(frog);
 
                     if (points == 1) {
                         model.getSnake().addSnakeTail(true);
@@ -108,9 +182,17 @@ public class Frog extends GameObject {
                         model.getSnake().addSnakeTail(false);
                     }
                 } else if (points < 0) {
-                    makeGameOver();
+                    makeGameStopped();
+                    model.getSnake().setRunning(false);
+                    model.setGameOver(true);
                 }
-//                repaint();
+
+                endTime = System.currentTimeMillis();
+
+                if ((endTime - startTime) >= moveTime) {
+                    move();
+                    startTime = 0;
+                }
             }
 
             sleep(sleepTime);
@@ -149,11 +231,11 @@ public class Frog extends GameObject {
         return running;
     }
 
-    private void makeGameOver() {
+    private void makeGameStopped() {
         running = false;
 
-        model.setGameOver(true);
-        model.setGameActive(false);
+//        model.setGameOver(true);
+//        model.setGameActive(false);
 
         frame.getControlPanel().getStartButton().setEnabled(true);
         frame.getControlPanel().getPauseButton().setEnabled(false);

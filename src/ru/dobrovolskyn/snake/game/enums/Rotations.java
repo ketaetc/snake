@@ -1,6 +1,6 @@
 package ru.dobrovolskyn.snake.game.enums;
 
-public enum SnakeRotations {
+public enum Rotations {
     LEFT,
-    RIGHT;
+    RIGHT
 }

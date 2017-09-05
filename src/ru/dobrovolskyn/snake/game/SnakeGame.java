@@ -1,8 +1,8 @@
 package ru.dobrovolskyn.snake.game;
 
 import ru.dobrovolskyn.snake.game.enums.Arguments;
-import ru.dobrovolskyn.snake.game.model.Frog;
-import ru.dobrovolskyn.snake.game.model.Snake;
+import ru.dobrovolskyn.snake.game.runnable.Frog;
+import ru.dobrovolskyn.snake.game.runnable.Snake;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
@@ -10,23 +10,27 @@ import javax.swing.*;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SnakeGame {
 
-    private static int gameBoardWidth;
-    private static int gameBoardHeight;
-    private static int snakeLength;
-    private static int frogsCount;
+    private static volatile int gameBoardWidth;
+    private static volatile int gameBoardHeight;
+    private static volatile int snakeLength;
+    private static volatile int frogsCount;
+    private static volatile long snakeSleep;
 
-    private static SnakeGameFrame snakeGameFrame;
-    private static SnakeGameModel snakeGameModel;
+    private static volatile SnakeGameFrame snakeGameFrame;
+    private static volatile SnakeGameModel snakeGameModel;
 
     private static volatile AtomicInteger snakeThreadsCounter = new AtomicInteger(0);
     private static volatile AtomicInteger frogsThreadsCounter = new AtomicInteger(0);
 
-    private static ExecutorService pool;
+    private static volatile ExecutorService pool;
     private static Random random;
+    private static volatile Object lock = new Object();
+    private static volatile Future<?> snakeFuture;
 
     public static void main(String[] args) throws Exception {
         if (parseArguments(args)) {
@@ -36,14 +40,14 @@ public class SnakeGame {
                 public void run() {
                     snakeGameModel = new SnakeGameModel();
                     snakeGameFrame = new SnakeGameFrame();
-                    Snake snake = createSnakeInstance(snakeLength);
+                    Snake snake = createSnake(snakeLength);
                     snakeThreadsCounter.addAndGet(1);
                     snake.setName(snakeThreadsCounter.get());
 
                     snakeGameModel.setSnake(snake);
 
                     pool = Executors.newFixedThreadPool(frogsCount + 1);
-                    pool.execute(snake);
+                    snakeFuture = pool.submit(snake);
 
 //                    Thread thread = new Thread(snake, "Snake:" + snakeThreadsCounter.get());
 //                    thread.start();
@@ -52,9 +56,10 @@ public class SnakeGame {
                         double chance = random.nextDouble();
                         Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
                         frog.setName(frogsThreadsCounter.addAndGet(1));
-                        snakeGameModel.addFrog(frog, frog.getName());
+//                        snakeGameModel.addFrog(frog, frog.getName());
+                        snakeGameModel.addFrog(frog, pool.submit(frog));
 
-                        pool.execute(frog);
+//                        pool.submit(frog);
                     }
                 }
             });
@@ -88,7 +93,7 @@ public class SnakeGame {
         return frogsCount;
     }
 
-    public static Snake createSnakeInstance(int snakeLength) {
+    public static Snake createSnake(int snakeLength) {
         return new Snake(snakeLength);
     }
 
@@ -98,6 +103,14 @@ public class SnakeGame {
 
     public static SnakeGameModel getSnakeGameModel() {
         return snakeGameModel;
+    }
+
+    public static long getSnakeSleep() {
+        return snakeSleep;
+    }
+
+    public static void setSnakeSleep(long snakeSleep) {
+        SnakeGame.snakeSleep = snakeSleep;
     }
 
     public static AtomicInteger getSnakeThreadsCounter() {
@@ -114,15 +127,17 @@ public class SnakeGame {
             System.out.println("Example:    java -jar Snake.jar \"-help\".");
             System.out.println("Program will run with default arguments");
 
-            gameBoardHeight = 10;
-            gameBoardWidth = 10;
+            gameBoardHeight = 15;
+            gameBoardWidth = 15;
             snakeLength = 3;
             frogsCount = 2;
+            snakeSleep = 1000L;
 
             SnakeGameModel.setCellHeight(gameBoardHeight);
             SnakeGameModel.setCellWidth(gameBoardWidth);
             SnakeGameModel.setSnakeLength(snakeLength);
             SnakeGameModel.setFrogsCount(frogsCount);
+            SnakeGameModel.setSnakeSleep(snakeSleep);
 
 //            return false;
             return true;
@@ -134,6 +149,7 @@ public class SnakeGame {
                 System.out.println("-width:     game board width (can't be less than 10)");
                 System.out.println("-length:    snake initial length (can't be less than 2 units)");
                 System.out.println("-frogs:     count of frogs on game board (can't be less than 1)");
+                System.out.println("-sleep:     snake sleeping time in milliseconds (can't be less than 500)");
                 System.out.println();
                 System.out.println("Example:    java -jar Snake.jar -height 11 -width 11 -length 3 -frogs 2");
 
@@ -143,6 +159,7 @@ public class SnakeGame {
                 gameBoardWidth = getArgument(args, Arguments.GAME_BOARD_WIDTH);
                 snakeLength = getArgument(args, Arguments.SNAKE_LENGTH);
                 frogsCount = getArgument(args, Arguments.FROGS_COUNT);
+                snakeSleep = getArgument(args, Arguments.SNAKE_SLEEP);
 
                 if (gameBoardHeight < 10) {
                     gameBoardHeight = 10;
@@ -169,6 +186,7 @@ public class SnakeGame {
                 SnakeGameModel.setCellWidth(gameBoardWidth);
                 SnakeGameModel.setSnakeLength(snakeLength);
                 SnakeGameModel.setFrogsCount(frogsCount);
+                SnakeGameModel.setSnakeSleep(snakeSleep);
 
                 return true;
             }
@@ -178,8 +196,12 @@ public class SnakeGame {
     }
 
     public static ExecutorService getPool() {
-        synchronized (pool) {
+        synchronized (lock) {
             return pool;
         }
+    }
+
+    public static Future getSnakeFuture() {
+        return snakeFuture;
     }
 }

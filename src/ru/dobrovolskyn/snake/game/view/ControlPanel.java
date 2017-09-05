@@ -33,7 +33,7 @@ public class ControlPanel {
         int gridY = 0;
 
         JLabel scoreLabel = new JLabel("Score");
-        Font labelFont = innerPanel.getFont().deriveFont(36.0F);
+        Font labelFont = innerPanel.getFont().deriveFont(32.0F);
         scoreLabel.setFont(labelFont);
         scoreLabel.setHorizontalAlignment(JLabel.CENTER);
         addComponent(innerPanel, scoreLabel, 0, gridY++, 1, 1, normalInsets,
@@ -41,7 +41,7 @@ public class ControlPanel {
 
         scoreField = new JTextField(6);
         scoreField.setEditable(false);
-        Font textFont = innerPanel.getFont().deriveFont(48.0F);
+        Font textFont = innerPanel.getFont().deriveFont(32.0F);
         scoreField.setFont(textFont);
         scoreField.setHorizontalAlignment(JTextField.CENTER);
         scoreField.setText(model.getFormattedScore());

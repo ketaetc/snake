@@ -1,9 +1,9 @@
 package ru.dobrovolskyn.snake.game.view;
 
-import ru.dobrovolskyn.snake.game.enums.SnakeRotations;
-import ru.dobrovolskyn.snake.game.model.Frog;
+import ru.dobrovolskyn.snake.game.enums.Rotations;
+import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.model.Segment;
-import ru.dobrovolskyn.snake.game.model.Snake;
+import ru.dobrovolskyn.snake.game.runnable.Snake;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 
 import javax.swing.*;
@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class GridPanel extends JPanel {
     private static final long serialVersionUID = 3259516267781813618L;
@@ -38,10 +39,10 @@ public class GridPanel extends JPanel {
 
                 switch (e.getButton()) {
                     case MouseEvent.BUTTON1:
-                        model.getSnake().rotate(SnakeRotations.LEFT);
+                        model.getSnake().rotate(Rotations.LEFT);
                         break;
                     case MouseEvent.BUTTON3:
-                        model.getSnake().rotate(SnakeRotations.RIGHT);
+                        model.getSnake().rotate(Rotations.RIGHT);
                         break;
                     default:
                         break;
@@ -50,12 +51,12 @@ public class GridPanel extends JPanel {
         });
     }
 
-    @Override
-    public void repaint(Rectangle r) {
-        super.repaint(r);
-
-
-    }
+//    @Override
+//    public void repaint(Rectangle r) {
+//        super.repaint(r);
+//
+//
+//    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -130,7 +131,8 @@ public class GridPanel extends JPanel {
     private void drawFrog(Graphics2D g2d, int squareWidth) {
 //        List<? extends Frog> frogList = model.getFrogList();
 //        for (Frog frog : frogList) {
-        Map<Frog, String> frogsMap = model.getFrogsMap();
+//        Map<Frog, String> frogsMap = model.getFrogsMap();
+        Map<Frog, Future<?>> frogsMap = model.getFrogsMap();
         for (Frog frog : frogsMap.keySet()) {
             Point p = frog.getLocation();
 

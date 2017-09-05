@@ -19,9 +19,9 @@ public class StartButtonActionListener implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         JButton button = (JButton) event.getSource();
         if (button.getModel().isArmed()) {
-            model.setGameActive(false);
+//            model.setGameActive(false);
 
-            frame.getGridPanel().repaint();
+//            frame.getGridPanel().repaint();
 
             frame.getControlPanel().getStartButton().setEnabled(false);
             frame.getControlPanel().getPauseButton().setEnabled(true);
@@ -36,7 +36,7 @@ public class StartButtonActionListener implements ActionListener {
     }
 
     private class WaitToStartRunnable implements Runnable {
-        private long sleepAmount = 500L;
+        private long sleepAmount = 300L;
 
         private SnakeGameFrame frame;
 

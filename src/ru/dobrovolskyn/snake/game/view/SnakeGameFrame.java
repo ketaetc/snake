@@ -6,10 +6,11 @@ import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.runnable.GameRunnable;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.NumberFormat;
+
+import static ru.dobrovolskyn.snake.game.enums.Directions.*;
 
 public class SnakeGameFrame {
     private static final NumberFormat NF = NumberFormat.getInstance();
@@ -28,7 +29,7 @@ public class SnakeGameFrame {
     private void createPartControl() {
         frame = new JFrame();
         frame.setTitle("Snake");
-        frame.setResizable(false);
+//        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -46,11 +47,11 @@ public class SnakeGameFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.LINE_AXIS));
 
-        gridPanel = new GridPanel(model);
-        mainPanel.add(gridPanel);
-
         controlPanel = new ControlPanel(this, model);
         mainPanel.add(controlPanel.getPanel());
+
+        gridPanel = new GridPanel(model);
+        mainPanel.add(gridPanel);
 
         frame.add(mainPanel);
         frame.pack();
@@ -67,30 +68,30 @@ public class SnakeGameFrame {
 
     private void setKeyBindings(JPanel gridPanel) {
         InputMap inputMap = gridPanel.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(KeyStroke.getKeyStroke("W"), "up arrow");
-        inputMap.put(KeyStroke.getKeyStroke("S"), "down arrow");
-        inputMap.put(KeyStroke.getKeyStroke("A"), "left arrow");
-        inputMap.put(KeyStroke.getKeyStroke("D"), "right arrow");
+        inputMap.put(KeyStroke.getKeyStroke(UP.getCharacter()), "up arrow");
+        inputMap.put(KeyStroke.getKeyStroke(DOWN.getCharacter()), "down arrow");
+        inputMap.put(KeyStroke.getKeyStroke(LEFT.getCharacter()), "left arrow");
+        inputMap.put(KeyStroke.getKeyStroke(RIGHT.getCharacter()), "right arrow");
 
-        inputMap.put(KeyStroke.getKeyStroke("UP"), "up arrow");
-        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "down arrow");
-        inputMap.put(KeyStroke.getKeyStroke("LEFT"), "left arrow");
-        inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "right arrow");
+        inputMap.put(KeyStroke.getKeyStroke(UP.getName()), "up arrow");
+        inputMap.put(KeyStroke.getKeyStroke(DOWN.getName()), "down arrow");
+        inputMap.put(KeyStroke.getKeyStroke(LEFT.getName()), "left arrow");
+        inputMap.put(KeyStroke.getKeyStroke(RIGHT.getName()), "right arrow");
 
         inputMap = gridPanel.getInputMap(JPanel.WHEN_FOCUSED);
-        inputMap.put(KeyStroke.getKeyStroke("UP"), "up arrow");
-        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "down arrow");
-        inputMap.put(KeyStroke.getKeyStroke("LEFT"), "left arrow");
-        inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "right arrow");
+        inputMap.put(KeyStroke.getKeyStroke(UP.getName()), "up arrow");
+        inputMap.put(KeyStroke.getKeyStroke(DOWN.getName()), "down arrow");
+        inputMap.put(KeyStroke.getKeyStroke(LEFT.getName()), "left arrow");
+        inputMap.put(KeyStroke.getKeyStroke(RIGHT.getName()), "right arrow");
 
         gridPanel.getActionMap().put("up arrow",
-                new ArrowAction(model, new Point(0, -1)));
+                new ArrowAction(model, UP.getDirection()));
         gridPanel.getActionMap().put("down arrow",
-                new ArrowAction(model, new Point(0, 1)));
+                new ArrowAction(model, DOWN.getDirection()));
         gridPanel.getActionMap().put("left arrow",
-                new ArrowAction(model, new Point(-1, 0)));
+                new ArrowAction(model, LEFT.getDirection()));
         gridPanel.getActionMap().put("right arrow",
-                new ArrowAction(model, new Point(1, 0)));
+                new ArrowAction(model, RIGHT.getDirection()));
     }
 
     private void exitProcedure() {

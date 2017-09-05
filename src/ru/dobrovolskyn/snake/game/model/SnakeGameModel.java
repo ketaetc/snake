@@ -1,6 +1,8 @@
 package ru.dobrovolskyn.snake.game.model;
 
 import ru.dobrovolskyn.snake.game.SnakeGame;
+import ru.dobrovolskyn.snake.game.runnable.Frog;
+import ru.dobrovolskyn.snake.game.runnable.Snake;
 
 import java.awt.*;
 import java.text.NumberFormat;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 public class SnakeGameModel {
     private static final int SQUARE_WIDTH = 32;
@@ -16,16 +19,16 @@ public class SnakeGameModel {
     private static int CELL_HEIGHT;
     private static int SNAKE_LENGTH;
     private static int FROGS_COUNT;
-    private final long SLEEP_TIME = 300L;
+    private static long SNAKE_SLEEP;
 
-    private boolean firstTimeSwitch;
-    private boolean gameActive;
-    private boolean gameOver;
-    private boolean gameStopped;
+    private volatile boolean firstTimeSwitch;
+    private volatile boolean gameActive;
+    private volatile boolean gameOver;
+    private volatile boolean gameStopped;
     private volatile int score;
 
     private java.util.List<Frog> frogList = new ArrayList<Frog>();
-    private Map<Frog, String> frogsMap = new ConcurrentHashMap<Frog, String>();
+    private Map<Frog, Future<?>> frogsMap = new ConcurrentHashMap<Frog, Future<?>>();
     private volatile Snake snake;
     private Random random;
 
@@ -76,26 +79,39 @@ public class SnakeGameModel {
     public void init() {
         if (firstTimeSwitch) {
             this.score = 0;
-            snake = SnakeGame.createSnakeInstance(SnakeGame.getSnakeLength());
+            snake.setRunning(false);
+
+            try {
+                SnakeGame.getSnakeFuture().cancel(true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+            snake = SnakeGame.createSnake(SNAKE_LENGTH);
             snake.setName(SnakeGame.getSnakeThreadsCounter().addAndGet(1));
-            SnakeGame.getSnakeGameModel().setSnake(snake);
-            SnakeGame.getPool().execute(snake);
+            setSnake(snake);
+            SnakeGame.getPool().submit(snake);
+
+            deactivateFrogs();
+            cancelFrogsThreads();
+            clearFrogsMap();
 
             for (int i =0; i < SnakeGame.getFrogsCount(); i++) {
                 double chance = random.nextDouble();
                 Point point = snake.getRandomNonSnakeLocation();
                 Frog frog = Frog.createRandomFrog(point, chance);
                 frog.setName(SnakeGame.getFrogsThreadsCounter().addAndGet(1));
-                SnakeGame.getSnakeGameModel().addFrog(frog, frog.getName());
+//                addFrog(frog, frog.getName());
+                addFrog(frog, SnakeGame.getPool().submit(frog));
 
-                SnakeGame.getPool().execute(frog);
+//                SnakeGame.getPool().submit(frog);
             }
 
 //            new Thread(snake, "Snake:" + SnakeGame.getSnakeThreadsCounter().get()).start();
 //            snake.createSnake();
 
 //            setFrogsLocation();
-            firstTimeSwitch = false;
+//            firstTimeSwitch = false;
         } else {
             firstTimeSwitch = true;
         }
@@ -118,10 +134,10 @@ public class SnakeGameModel {
     }
 
     public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
         if (gameOver) {
             setGameActive(false);
         }
+        this.gameOver = gameOver;
     }
 
     public boolean isGameStopped() {
@@ -150,7 +166,7 @@ public class SnakeGameModel {
     }
 
     public long getSleepTime() {
-        return SLEEP_TIME;
+        return SNAKE_SLEEP;
     }
 
     public List<Frog> getFrogList() {
@@ -186,15 +202,46 @@ public class SnakeGameModel {
         }
     }
 
-    public void addFrog(Frog frog, String name) {
-        this.frogsMap.put(frog, name);
+//    public void addFrog(Frog frog, String name) {
+    public void addFrog(Frog frog, Future<?> future) {
+//        this.frogsMap.put(frog, name);
+        this.frogsMap.put(frog, future);
     }
 
     public void removeFrog(Frog frog) {
         this.frogsMap.remove(frog);
     }
 
-    public Map<Frog, String> getFrogsMap() {
+//    public Map<Frog, String> getFrogsMap() {
+    public Map<Frog, Future<?>> getFrogsMap() {
         return frogsMap;
+    }
+
+    public void clearFrogsMap() {
+        frogsMap.clear();
+    }
+
+    public static void setSnakeSleep(long snakeSleep) {
+        SNAKE_SLEEP = snakeSleep;
+    }
+
+    public static long getSnakeSleep() {
+        return SNAKE_SLEEP;
+    }
+
+    private void deactivateFrogs() {
+        for (Frog frog : getFrogsMap().keySet()) {
+            frog.setRunning(false);
+        }
+    }
+
+    public void cancelFrogsThreads() {
+        for (Future<?> future : getFrogsMap().values()) {
+            try {
+                future.cancel(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

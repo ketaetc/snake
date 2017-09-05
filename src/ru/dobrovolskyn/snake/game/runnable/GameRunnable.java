@@ -1,12 +1,9 @@
 package ru.dobrovolskyn.snake.game.runnable;
 
-import ru.dobrovolskyn.snake.game.model.Frog;
-import ru.dobrovolskyn.snake.game.model.Snake;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import javax.swing.*;
-import java.util.List;
 import java.util.Random;
 
 public class GameRunnable implements Runnable {
@@ -29,7 +26,7 @@ public class GameRunnable implements Runnable {
             if (model.isGameActive()) {
 //                Snake snake = model.getSnake();
 //                List<Frog> frogList = model.getFrogList();
-//                snake.updatePosition();
+//                snake.move();
 //
 //                if (snake.isSnakeDead()) {
 //                    makeGameOver();

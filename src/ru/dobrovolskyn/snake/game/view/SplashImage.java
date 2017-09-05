@@ -27,9 +27,10 @@ public class SplashImage implements Runnable {
         g.setColor(c);
         g.fillRect(0, 0, d.width, d.height);
 
-        g.setColor(Color.BLUE);
+//        g.setColor(Color.YELLOW);
+        g.setColor(new Color(255, 153, 54));
         Font font = g.getFont();
-        Font largeFont = font.deriveFont(36.0F);
+        Font largeFont = font.deriveFont(32.0F);
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r = largeFont.getStringBounds(splashString, frc);
         int rWidth = (int) Math.round(r.getWidth());
