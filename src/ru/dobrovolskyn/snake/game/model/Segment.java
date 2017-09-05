@@ -5,7 +5,7 @@ import java.awt.*;
 public class Segment {
     private final Color color;
     private Point direction;
-    private Point location;
+    private volatile Point location;
 
     public Segment() {
         this.color = Color.YELLOW;

@@ -1,7 +1,11 @@
 package ru.dobrovolskyn.snake.game.model;
 
-public class GameObject implements Runnable {
+public abstract class GameObject implements Runnable {
+    private String name;
 
-    public void run() {
-    }
+    public abstract void run();
+
+    public abstract void setName(int num);
+
+    public abstract String getName();
 }

@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.Map;
 
 public class GridPanel extends JPanel {
     private static final long serialVersionUID = 3259516267781813618L;
@@ -47,6 +48,13 @@ public class GridPanel extends JPanel {
                 }
             }
         });
+    }
+
+    @Override
+    public void repaint(Rectangle r) {
+        super.repaint(r);
+
+
     }
 
     @Override
@@ -96,8 +104,8 @@ public class GridPanel extends JPanel {
             x = p.x * squareWidth;
             y = p.y * squareWidth;
 
-            g2d.setColor(Color.RED);
-            g2d.drawRect(x, y, squareWidth, squareWidth);
+//            g2d.setColor(Color.RED);
+//            g2d.drawRect(x, y, squareWidth, squareWidth);
 
             g2d.setColor(segment.getColor());
 
@@ -112,28 +120,25 @@ public class GridPanel extends JPanel {
     }
 
     private void drawCircle(Graphics2D g2d, int x, int y, int radius, int scale) {
-        g2d.fillOval(x + radius / 2, y + radius / 2, radius / scale, radius / scale);
-    }
-
-    public void drawCenteredCircle(Graphics2D g, int x, int y, int r, int scale) {
-        x += r / 2;
-        y += r / 2;
-
-        r /= scale;
-
-        g.fillOval(x, y, r, r);
+        int halfRad = radius / 2;
+        int xX = x + halfRad - halfRad / scale;
+        int yY = y + halfRad - halfRad / scale;
+        int rad = radius / scale;
+        g2d.fillOval(xX, yY, rad, rad);
     }
 
     private void drawFrog(Graphics2D g2d, int squareWidth) {
-        List<? extends Frog> frogList = model.getFrogList();
-        for (Frog frog : frogList) {
+//        List<? extends Frog> frogList = model.getFrogList();
+//        for (Frog frog : frogList) {
+        Map<Frog, String> frogsMap = model.getFrogsMap();
+        for (Frog frog : frogsMap.keySet()) {
             Point p = frog.getLocation();
 
             int x = p.x * squareWidth;
             int y = p.y * squareWidth;
 
-            g2d.setColor(Color.RED);
-            g2d.drawRect(x, y, squareWidth, squareWidth);
+//            g2d.setColor(Color.RED);
+//            g2d.drawRect(x, y, squareWidth, squareWidth);
 
             g2d.setColor(frog.getColor());
 

@@ -1,10 +1,14 @@
 package ru.dobrovolskyn.snake.game.model;
 
+import ru.dobrovolskyn.snake.game.SnakeGame;
+
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SnakeGameModel {
     private static final int SQUARE_WIDTH = 32;
@@ -18,10 +22,11 @@ public class SnakeGameModel {
     private boolean gameActive;
     private boolean gameOver;
     private boolean gameStopped;
-    private int score;
+    private volatile int score;
 
     private java.util.List<Frog> frogList = new ArrayList<Frog>();
-    private Snake snake;
+    private Map<Frog, String> frogsMap = new ConcurrentHashMap<Frog, String>();
+    private volatile Snake snake;
     private Random random;
 
     public SnakeGameModel() {
@@ -29,14 +34,15 @@ public class SnakeGameModel {
         this.firstTimeSwitch = false;
         this.gameActive = false;
         this.gameOver = false;
-        this.snake = new Snake(SNAKE_LENGTH);
+//        this.snake = new Snake(SNAKE_LENGTH);
+//        this.snake = set;
         this.random = new Random();
 
-        for (int i = 0; i < FROGS_COUNT; i++) {
-            double chance = random.nextDouble();
-            Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
-            this.frogList.add(frog);
-        }
+//        for (int i = 0; i < FROGS_COUNT; i++) {
+//            double chance = random.nextDouble();
+//            Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
+//            this.frogList.add(frog);
+//        }
     }
 
     public static int getSquareWidth() {
@@ -70,9 +76,26 @@ public class SnakeGameModel {
     public void init() {
         if (firstTimeSwitch) {
             this.score = 0;
-            snake.createSnake();
+            snake = SnakeGame.createSnakeInstance(SnakeGame.getSnakeLength());
+            snake.setName(SnakeGame.getSnakeThreadsCounter().addAndGet(1));
+            SnakeGame.getSnakeGameModel().setSnake(snake);
+            SnakeGame.getPool().execute(snake);
 
-            setFrogsLocation();
+            for (int i =0; i < SnakeGame.getFrogsCount(); i++) {
+                double chance = random.nextDouble();
+                Point point = snake.getRandomNonSnakeLocation();
+                Frog frog = Frog.createRandomFrog(point, chance);
+                frog.setName(SnakeGame.getFrogsThreadsCounter().addAndGet(1));
+                SnakeGame.getSnakeGameModel().addFrog(frog, frog.getName());
+
+                SnakeGame.getPool().execute(frog);
+            }
+
+//            new Thread(snake, "Snake:" + SnakeGame.getSnakeThreadsCounter().get()).start();
+//            snake.createSnake();
+
+//            setFrogsLocation();
+            firstTimeSwitch = false;
         } else {
             firstTimeSwitch = true;
         }
@@ -149,5 +172,29 @@ public class SnakeGameModel {
         int height = SQUARE_WIDTH * CELL_HEIGHT;
 
         return new Dimension(width, height);
+    }
+
+    public void setSnake(Snake snake) {
+        this.snake = snake;
+    }
+
+    public void setFrogs() {
+        for (int i = 0; i < FROGS_COUNT; i++) {
+            double chance = random.nextDouble();
+            Frog frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
+            this.frogList.add(frog);
+        }
+    }
+
+    public void addFrog(Frog frog, String name) {
+        this.frogsMap.put(frog, name);
+    }
+
+    public void removeFrog(Frog frog) {
+        this.frogsMap.remove(frog);
+    }
+
+    public Map<Frog, String> getFrogsMap() {
+        return frogsMap;
     }
 }

@@ -1,11 +1,14 @@
 package ru.dobrovolskyn.snake.game.model;
 
+import ru.dobrovolskyn.snake.game.SnakeGame;
 import ru.dobrovolskyn.snake.game.enums.SnakeRotations;
+import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Snake extends GameObject {
     private static int MIN_SNAKE_LENGTH = 2;
@@ -13,12 +16,27 @@ public class Snake extends GameObject {
     private List<Segment> snakeCells;
     private Point snakeDirection;
     private Random random;
+    private volatile boolean running;
+    private SnakeGameFrame frame;
+    private SnakeGameModel model;
+    private volatile String name;
 
     public Snake(int snakeLength) {
+        this.running = true;
         this.snakeLength = snakeLength;
         this.random = new Random();
-        this.snakeCells = new ArrayList<Segment>();
+        this.snakeCells = new CopyOnWriteArrayList<Segment>();
+        this.frame = SnakeGame.getSnakeGameFrame();
+        this.model = SnakeGame.getSnakeGameModel();
         createSnake();
+    }
+
+    public void setName(int num) {
+        this.name = "Snake:" + num;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void createSnake() {
@@ -108,8 +126,8 @@ public class Snake extends GameObject {
         Point p;
 
         do {
-            int x = random.nextInt(SnakeGameModel.getCellWidth());
-            int y = random.nextInt(SnakeGameModel.getCellHeight());
+            int x = random.nextInt(model.getCellWidth());
+            int y = random.nextInt(model.getCellHeight());
             p = new Point(x, y);
         } while (isSnakeLocation(p));
 
@@ -127,8 +145,8 @@ public class Snake extends GameObject {
     }
 
     public boolean isSnakeDead() {
-        int segmentWidth = SnakeGameModel.getCellWidth();
-        int segmentHeight = SnakeGameModel.getCellHeight();
+        int segmentWidth = model.getCellWidth();
+        int segmentHeight = model.getCellHeight();
 
         for (Segment segment : snakeCells) {
             Point p = segment.getLocation();
@@ -176,8 +194,70 @@ public class Snake extends GameObject {
         return this.snakeDirection;
     }
 
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
     @Override
     public void run() {
-        super.run();
+        System.out.println("running:    " + getName());
+        long sleepTime = model.getSleepTime();
+        while (running) {
+            if (model.isGameActive()) {
+                this.updatePosition();
+
+                if (this.isSnakeDead()) {
+                    makeGameStopped();
+                    model.setGameOver(true);
+                }
+
+                if (model.isGameStopped()) {
+//                    model.setGameActive(false);
+                    makeGameStopped();
+                }
+//                repaint();
+            }
+
+            sleep(sleepTime);
+        }
+    }
+
+    private void makeGameStopped() {
+        running = false;
+
+//        model.setGameOver(true);
+        model.setGameActive(false);
+
+        frame.getControlPanel().getStartButton().setEnabled(true);
+        frame.getControlPanel().getPauseButton().setEnabled(false);
+        frame.getControlPanel().getStopButton().setEnabled(false);
+    }
+
+    private void setScoreText() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                frame.setScoreText();
+            }
+        });
+    }
+
+    private void repaint() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                frame.repaintGridPanel();
+            }
+        });
+    }
+
+    private void sleep(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+
+        }
     }
 }

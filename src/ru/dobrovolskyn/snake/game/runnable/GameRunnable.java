@@ -23,47 +23,48 @@ public class GameRunnable implements Runnable {
     }
 
     public void run() {
+//        long sleepTime = model.getSleepTime();
+        long sleepTime = 100L;
         while (running) {
             if (model.isGameActive()) {
-                Snake snake = model.getSnake();
-                List<Frog> frogList = model.getFrogList();
-                snake.updatePosition();
-
-                if (snake.isSnakeDead()) {
-                    makeGameOver();
-                }
-
-                if (model.isGameStopped()) {
-                    model.setGameActive(false);
-                }
-
-                for (int i = 0; i < frogList.size(); i++) {
-                    int points = frogList.get(i).frogEaten(snake.getSnakeHeadLocation());
-
-                    model.addScore(points);
-                    setScoreText();
-
-                    double chance = random.nextDouble();
-                    Frog frog;
-                    if (points > 0) {
-                        frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
-
-                        frogList.remove(i);
-                        frogList.add(i, frog);
-
-                        if (points == 1) {
-                            snake.addSnakeTail(true);
-                        } else {
-                            snake.addSnakeTail(false);
-                        }
-                    } else if (points < 0) {
-                        makeGameOver();
-                    }
-                }
+//                Snake snake = model.getSnake();
+//                List<Frog> frogList = model.getFrogList();
+//                snake.updatePosition();
+//
+//                if (snake.isSnakeDead()) {
+//                    makeGameOver();
+//                }
+//
+//                if (model.isGameStopped()) {
+//                    model.setGameActive(false);
+//                }
+//
+//                for (int i = 0; i < frogList.size(); i++) {
+//                    int points = frogList.get(i).frogEaten(snake.getSnakeHeadLocation());
+//
+//                    model.addScore(points);
+//                    setScoreText();
+//
+//                    double chance = random.nextDouble();
+//                    Frog frog;
+//                    if (points > 0) {
+//                        frog = Frog.createRandomFrog(snake.getRandomNonSnakeLocation(), chance);
+//
+//                        frogList.remove(i);
+//                        frogList.add(i, frog);
+//
+//                        if (points == 1) {
+//                            snake.addSnakeTail(true);
+//                        } else {
+//                            snake.addSnakeTail(false);
+//                        }
+//                    } else if (points < 0) {
+//                        makeGameOver();
+//                    }
+//                }
                 repaint();
             }
 
-            long sleepTime = model.getSleepTime();
             sleep(sleepTime);
         }
     }

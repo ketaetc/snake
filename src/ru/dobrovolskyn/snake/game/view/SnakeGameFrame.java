@@ -1,5 +1,6 @@
 package ru.dobrovolskyn.snake.game.view;
 
+import ru.dobrovolskyn.snake.game.SnakeGame;
 import ru.dobrovolskyn.snake.game.controller.ArrowAction;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.runnable.GameRunnable;
@@ -18,8 +19,8 @@ public class SnakeGameFrame {
     private JFrame frame;
     private SnakeGameModel model;
 
-    public SnakeGameFrame(SnakeGameModel model) {
-        this.model = model;
+    public SnakeGameFrame() {
+        this.model = SnakeGame.getSnakeGameModel();
 
         createPartControl();
     }
@@ -93,14 +94,9 @@ public class SnakeGameFrame {
     }
 
     private void exitProcedure() {
-        gameRunnable.setRunning(false);
+        model.getSnake().setRunning(false);
         frame.dispose();
         System.exit(0);
-    }
-
-    public void stopProcedure() {
-        gameRunnable.setRunning(false);
-        frame.dispose();
     }
 
     public void repaintGridPanel() {
@@ -117,5 +113,13 @@ public class SnakeGameFrame {
 
     public ControlPanel getControlPanel() {
         return controlPanel;
+    }
+
+    public SnakeGameModel getModel() {
+        return model;
+    }
+
+    public GridPanel getGridPanel() {
+        return gridPanel;
     }
 }

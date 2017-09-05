@@ -1,11 +1,14 @@
 package ru.dobrovolskyn.snake.game.controller;
 
+import ru.dobrovolskyn.snake.game.SnakeGame;
+import ru.dobrovolskyn.snake.game.model.Frog;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 public class StopButtonActionListener implements ActionListener {
     private SnakeGameFrame frame;
@@ -21,6 +24,12 @@ public class StopButtonActionListener implements ActionListener {
         if (button.getModel().isArmed()) {
             model.setGameActive(false);
             model.setGameStopped(true);
+
+            model.getSnake().setRunning(false);
+            for (Frog frog : model.getFrogsMap().keySet()) {
+                frog.setRunning(false);
+            }
+
 
             frame.getControlPanel().getStartButton().setEnabled(true);
             frame.getControlPanel().getPauseButton().setSelected(false);
