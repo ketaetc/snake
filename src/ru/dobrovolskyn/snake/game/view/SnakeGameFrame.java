@@ -108,10 +108,6 @@ public class SnakeGameFrame {
         controlPanel.setScoreText(NF.format(model.getScore()));
     }
 
-//    public void setPauseButton() {
-//        controlPanel.setPauseButton(model.isGameActive());
-//    }
-
     public ControlPanel getControlPanel() {
         return controlPanel;
     }
@@ -119,8 +115,4 @@ public class SnakeGameFrame {
     public SnakeGameModel getModel() {
         return model;
     }
-
-//    public GridPanel getGridPanel() {
-//        return gridPanel;
-//    }
 }

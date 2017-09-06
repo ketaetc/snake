@@ -4,6 +4,7 @@ import ru.dobrovolskyn.snake.game.SnakeGame;
 import ru.dobrovolskyn.snake.game.enums.Rotations;
 import ru.dobrovolskyn.snake.game.model.Segment;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
+import ru.dobrovolskyn.snake.game.util.Utils;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public class Snake extends GameObject {
     private static int MIN_SNAKE_LENGTH = 2;
     private int snakeLength;
     private List<Segment> snakeCells;
-    private Point snakeDirection;
+    private volatile Point direction;
     private Random random;
     private volatile boolean running;
     private SnakeGameFrame frame;
@@ -32,32 +33,32 @@ public class Snake extends GameObject {
         createSnake();
     }
 
-    public void setName(int num) {
-        this.name = "Snake:" + num;
-    }
-
     public String getName() {
         return name;
     }
 
+    public void setName(int num) {
+        this.name = "Snake:" + num;
+    }
+
     public void createSnake() {
         this.snakeCells.clear();
-        this.snakeDirection = new Point(1, 0);
+        this.direction = new Point(1, 0);
 
         int x = snakeLength - 1;
         int y = 0;
 
         Segment head = new Segment();
         head.setLocation(new Point(x, y));
-        head.setDirection(snakeDirection);
+        head.setDirection(this.direction);
         snakeCells.add(head);
 
         for (int i = 0; i < snakeLength - 1; i++) {
-            x -= snakeDirection.x;
-            y -= snakeDirection.y;
+            x -= this.direction.x;
+            y -= this.direction.y;
             Segment segment = new Segment();
             segment.setLocation(new Point(x, y));
-            segment.setDirection(snakeDirection);
+            segment.setDirection(this.direction);
             snakeCells.add(segment);
         }
     }
@@ -77,9 +78,9 @@ public class Snake extends GameObject {
             segment2.setLocation(location);
         }
 
-        segment.setDirection(snakeDirection);
+        segment.setDirection(this.direction);
 
-        Point location = makeTransfer(segment.getLocation(), snakeDirection);
+        Point location = makeTransfer(segment.getLocation(), this.direction);
 
         segment.setLocation(location);
     }
@@ -118,16 +119,21 @@ public class Snake extends GameObject {
 
     public void setSnakeDirection(Point snakeDirection) {
         if (!checkUTurn(snakeDirection)) {
-            this.snakeDirection = snakeDirection;
+            this.direction = snakeDirection;
         }
+    }
+
+    @Override
+    public Point getDirection() {
+        return this.direction;
     }
 
     public Point getRandomNonSnakeLocation() {
         Point p;
 
         do {
-            int x = random.nextInt(SnakeGameModel.getCellWidth());
-            int y = random.nextInt(SnakeGameModel.getCellHeight());
+            int x = random.nextInt(SnakeGameModel.getBoardWidth());
+            int y = random.nextInt(SnakeGameModel.getBoardHeight());
             p = new Point(x, y);
         } while (isSnakeLocation(p));
 
@@ -145,7 +151,7 @@ public class Snake extends GameObject {
     }
 
     public boolean isSnakeDead() {
-        for (int i = 1; i < (getSnakeLength() - 1); i++) {
+        for (int i = 1; i < getSnakeLength(); i++) {
             Point s = snakeCells.get(i).getLocation();
             if (s.equals(getSnakeHeadLocation())) {
                 return true;
@@ -156,8 +162,8 @@ public class Snake extends GameObject {
     }
 
     private boolean checkUTurn(Point snakeDirection) {
-        if ((this.snakeDirection.getX() == (-snakeDirection.getX()))
-                || (this.snakeDirection.getY() == (-snakeDirection.getY()))) {
+        if ((this.direction.getX() == (-snakeDirection.getX()))
+                || (this.direction.getY() == (-snakeDirection.getY()))) {
             return true;
         }
 
@@ -166,16 +172,16 @@ public class Snake extends GameObject {
 
     public Point rotate(Rotations rotation) {
         if (rotation == Rotations.LEFT) {
-            int x = (int) this.snakeDirection.getY();
-            int y = (int) this.snakeDirection.getX() * -1;
-            this.snakeDirection = new Point(x, y);
+            int x = (int) this.direction.getY();
+            int y = (int) this.direction.getX() * -1;
+            this.direction = new Point(x, y);
         }
         if (rotation == Rotations.RIGHT) {
-            int x = (int) this.snakeDirection.getY() * -1;
-            int y = (int) this.snakeDirection.getX();
-            this.snakeDirection = new Point(x, y);
+            int x = (int) this.direction.getY() * -1;
+            int y = (int) this.direction.getX();
+            this.direction = new Point(x, y);
         }
-        return this.snakeDirection;
+        return this.direction;
     }
 
     public void setRunning(boolean running) {
@@ -189,8 +195,9 @@ public class Snake extends GameObject {
                 move();
 
                 if (this.isSnakeDead()) {
-                    makeStop();
                     model.setGameOver(true);
+                    frame.repaintGridPanel();
+                    makeStop();
                 }
 
                 if (model.isGameStopped()) {
@@ -199,7 +206,7 @@ public class Snake extends GameObject {
                 }
             }
 
-            sleep(SnakeGame.getSnakeSleep());
+            sleep(Utils.getSnakeSleep());
         }
     }
 

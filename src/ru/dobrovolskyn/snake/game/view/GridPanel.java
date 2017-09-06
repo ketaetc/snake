@@ -1,10 +1,10 @@
 package ru.dobrovolskyn.snake.game.view;
 
 import ru.dobrovolskyn.snake.game.enums.Rotations;
-import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.model.Segment;
-import ru.dobrovolskyn.snake.game.runnable.Snake;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
+import ru.dobrovolskyn.snake.game.runnable.Frog;
+import ru.dobrovolskyn.snake.game.runnable.Snake;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -20,9 +20,11 @@ public class GridPanel extends JPanel {
     private SplashImage gameOverImage;
     private SplashImage gameStoppedImage;
     private SnakeGameModel model;
+    private boolean firstPaint = false;
 
     public GridPanel(final SnakeGameModel model) {
         this.model = model;
+        this.firstPaint = true;
         this.gameOverImage = new SplashImage(model, "Game Over");
         this.gameOverImage.run();
         this.gameStoppedImage = new SplashImage(model, "Game Stopped");
@@ -56,21 +58,21 @@ public class GridPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        int cellWidth = SnakeGameModel.getCellWidth();
-        int cellHeight = SnakeGameModel.getCellHeight();
+        int boardWidth = SnakeGameModel.getBoardWidth();
+        int boardHeight = SnakeGameModel.getBoardHeight();
         int squareWidth = SnakeGameModel.getSquareWidth();
 
         int x = 0;
         int y = 0;
 
-        for (int w = 0; w < cellWidth; w++) {
-            for (int h = 0; h < cellHeight; h++) {
+        for (int w = 0; w < boardWidth; w++) {
+            for (int h = 0; h < boardHeight; h++) {
                 g2d.setColor(Color.BLACK);
                 g2d.fillRect(x, y, squareWidth, squareWidth);
 //                g2d.drawRect(x, y, squareWidth, squareWidth);
                 y += squareWidth;
             }
-            x += SnakeGameModel.getSquareWidth();
+            x += squareWidth;
             y = 0;
         }
 

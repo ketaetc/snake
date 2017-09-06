@@ -3,11 +3,11 @@ package ru.dobrovolskyn.snake.game.model;
 import ru.dobrovolskyn.snake.game.SnakeGame;
 import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.runnable.Snake;
+import ru.dobrovolskyn.snake.game.util.Utils;
 
 import java.awt.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,8 +15,8 @@ import java.util.concurrent.Future;
 
 public class SnakeGameModel {
     private static final int SQUARE_WIDTH = 32;
-    private static int CELL_WIDTH;
-    private static int CELL_HEIGHT;
+    private static int BOARD_WIDTH;
+    private static int BOARD_HEIGHT;
     private static int SNAKE_LENGTH;
     private static int FROGS_COUNT;
     private static long SNAKE_SLEEP;
@@ -44,20 +44,20 @@ public class SnakeGameModel {
         return SQUARE_WIDTH;
     }
 
-    public static int getCellWidth() {
-        return CELL_WIDTH;
+    public static int getBoardWidth() {
+        return BOARD_WIDTH;
     }
 
-    public static void setCellWidth(int cellWidth) {
-        CELL_WIDTH = cellWidth;
+    public static void setBoardWidth(int boardWidth) {
+        BOARD_WIDTH = boardWidth;
     }
 
-    public static int getCellHeight() {
-        return CELL_HEIGHT;
+    public static int getBoardHeight() {
+        return BOARD_HEIGHT;
     }
 
-    public static void setCellHeight(int cellHeight) {
-        CELL_HEIGHT = cellHeight;
+    public static void setBoardHeight(int boardHeight) {
+        BOARD_HEIGHT = boardHeight;
     }
 
     public static void setSnakeLength(int snakeLength) {
@@ -68,14 +68,22 @@ public class SnakeGameModel {
         FROGS_COUNT = frogsCount;
     }
 
+    public static long getSnakeSleep() {
+        return SNAKE_SLEEP;
+    }
+
+    public static void setSnakeSleep(long snakeSleep) {
+        SNAKE_SLEEP = snakeSleep;
+    }
+
     public void init() {
         if (firstTimeSwitch) {
             this.score = 0;
             snake.setRunning(false);
 
             try {
-                SnakeGame.getSnakeFuture().cancel(true);
-            } catch (Exception e){
+                Utils.getSnakeFuture().cancel(true);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -88,7 +96,7 @@ public class SnakeGameModel {
             cancelFrogsThreads();
             clearFrogsMap();
 
-            for (int i =0; i < SnakeGame.getFrogsCount(); i++) {
+            for (int i = 0; i < Utils.getFrogsCount(); i++) {
                 double chance = random.nextDouble();
                 Point point = snake.getRandomNonSnakeLocation();
                 Frog frog = Frog.createRandomFrog(point, chance);
@@ -102,6 +110,10 @@ public class SnakeGameModel {
 
     public Snake getSnake() {
         return snake;
+    }
+
+    public void setSnake(Snake snake) {
+        this.snake = snake;
     }
 
     public boolean isGameActive() {
@@ -149,14 +161,10 @@ public class SnakeGameModel {
     }
 
     public Dimension getPreferredSize() {
-        int width = SQUARE_WIDTH * CELL_WIDTH;
-        int height = SQUARE_WIDTH * CELL_HEIGHT;
+        int width = SQUARE_WIDTH * BOARD_WIDTH;
+        int height = SQUARE_WIDTH * BOARD_HEIGHT;
 
         return new Dimension(width, height);
-    }
-
-    public void setSnake(Snake snake) {
-        this.snake = snake;
     }
 
     public void addFrog(Frog frog, Future<?> future) {
@@ -175,14 +183,6 @@ public class SnakeGameModel {
         frogsMap.clear();
     }
 
-    public static void setSnakeSleep(long snakeSleep) {
-        SNAKE_SLEEP = snakeSleep;
-    }
-
-    public static long getSnakeSleep() {
-        return SNAKE_SLEEP;
-    }
-
     private void deactivateFrogs() {
         for (Frog frog : getFrogsMap().keySet()) {
             frog.setRunning(false);
@@ -196,6 +196,14 @@ public class SnakeGameModel {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void cancelFrogThread(Frog frog) {
+        try {
+            getFrogsMap().get(frog).cancel(true);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

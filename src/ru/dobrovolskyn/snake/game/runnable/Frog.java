@@ -1,6 +1,7 @@
 package ru.dobrovolskyn.snake.game.runnable;
 
 import ru.dobrovolskyn.snake.game.SnakeGame;
+import ru.dobrovolskyn.snake.game.enums.Directions;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
@@ -30,12 +31,22 @@ public class Frog extends GameObject {
         this.moveTime = moveTime;
     }
 
-    public void setName(int num) {
-        this.name = "Frog:" + num;
+    public static Frog createRandomFrog(Point randomNonSnakeLocation, double chance) {
+        if (chance >= 0.8) {
+            return new RedFrog(randomNonSnakeLocation);
+        } else if (chance <= 0.03) {
+            return new BlueFrog(randomNonSnakeLocation);
+        } else {
+            return new GreenFrog(randomNonSnakeLocation);
+        }
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(int num) {
+        this.name = "Frog:" + num;
     }
 
     @Override
@@ -43,30 +54,44 @@ public class Frog extends GameObject {
         double randomValue = random.nextDouble();
         int generationCounter = 0;
         boolean interrupted = false;
+        Point newLocation;
+        Point direction = getDirection();
 
-        Point direction = generateNewPoint(randomValue);
-        int x = location.x + direction.x;
-        int y = location.y + direction.y;
-        Point newLocation = new Point(x, y);
-
-        while (checkCollision(newLocation)) {
-            if (generationCounter >= 10) {
-                interrupted = true;
-                break;
-            }
-            randomValue = random.nextDouble();
-
+        if (getDistanceTo(model.getSnake().getSnakeHeadLocation()) > 4) {
             direction = generateNewPoint(randomValue);
-            x = location.x + direction.x;
-            y = location.y + direction.y;
+            int x = location.x + direction.x;
+            int y = location.y + direction.y;
             newLocation = new Point(x, y);
 
-            generationCounter++;
-        }
+            while (checkCollision(newLocation)) {
+                if (generationCounter >= 10) {
+                    interrupted = true;
+                    break;
+                }
+                randomValue = random.nextDouble();
 
-        if (!interrupted) {
-            newLocation = makeTransfer(location, direction);
+                direction = generateNewPoint(randomValue);
+                x = location.x + direction.x;
+                y = location.y + direction.y;
+                newLocation = new Point(x, y);
 
+                generationCounter++;
+            }
+
+            if (!interrupted) {
+                newLocation = makeTransfer(location, direction);
+                setDirection(direction);
+
+                setLocation(newLocation);
+            }
+        } else {
+            direction = model.getSnake().getDirection();
+            setDirection(direction);
+            if (randomValue < 0.8) {
+                newLocation = makeTransfer(location, direction);
+            } else {
+                newLocation = getFarPoint(model.getSnake().getSnakeHeadLocation());
+            }
             setLocation(newLocation);
         }
     }
@@ -100,16 +125,6 @@ public class Frog extends GameObject {
 
     private boolean checkCollision(Point newLocation) {
         return (model.getSnake().isSnakeLocation(newLocation) || checkFrogsCollision(newLocation));
-    }
-
-    public static Frog createRandomFrog(Point randomNonSnakeLocation, double chance) {
-        if (chance >= 0.8) {
-            return new RedFrog(randomNonSnakeLocation);
-        } else if (chance <= 0.03) {
-            return new BlueFrog(randomNonSnakeLocation);
-        } else {
-            return new GreenFrog(randomNonSnakeLocation);
-        }
     }
 
     public Point getLocation() {
@@ -154,7 +169,7 @@ public class Frog extends GameObject {
                     frog.setName(SnakeGame.getFrogsThreadsCounter().addAndGet(1));
 
                     setRunning(false);
-
+                    model.cancelFrogThread(this);
                     model.removeFrog(this);
                     model.addFrog(frog, SnakeGame.getPool().submit(frog));
 
@@ -164,9 +179,10 @@ public class Frog extends GameObject {
                         model.getSnake().addSnakeTail(false);
                     }
                 } else if (points < 0) {
+                    model.setGameOver(true);
+                    frame.repaintGridPanel();
                     makeStop();
                     model.getSnake().setRunning(false);
-                    model.setGameOver(true);
                 }
 
                 endTime = System.currentTimeMillis();
@@ -179,6 +195,42 @@ public class Frog extends GameObject {
 
             sleep(sleepTime);
         }
+    }
+
+    private double getDistanceTo(Point point) {
+        double distance = Math.sqrt(Math.pow(this.location.getX() - point.getX(), 2) + Math.pow(this.location.getY() -
+                point.getY(), 2));
+
+        return Math.abs(distance);
+    }
+
+    private Point getFarPoint(Point point) {
+        Point locationNorth = makeTransfer(this.location, Directions.UP.getDirection());
+        Point locationSouth = makeTransfer(this.location, Directions.DOWN.getDirection());
+        Point locationWest = makeTransfer(this.location, Directions.LEFT.getDirection());
+        Point locationEast = makeTransfer(this.location, Directions.RIGHT.getDirection());
+
+        double distanceNorth = Math.sqrt(Math.pow(locationNorth.getX() - point.getX(), 2) + Math.pow(locationNorth.getY() - point.getY(), 2));
+        double distanceSouth = Math.sqrt(Math.pow(locationSouth.getX() - point.getX(), 2) + Math.pow(locationSouth.getY() - point.getY(), 2));
+        double distanceWest = Math.sqrt(Math.pow(locationWest.getX() - point.getX(), 2) + Math.pow(locationWest.getY() - point.getY(), 2));
+        double distanceEast = Math.sqrt(Math.pow(locationEast.getX() - point.getX(), 2) + Math.pow(locationEast.getY() - point.getY(), 2));
+
+        double maxDistance = Math.max(distanceNorth, Math.max(distanceSouth, Math.max(distanceWest, distanceEast)));
+
+        if (maxDistance == distanceNorth) {
+            return locationNorth;
+        }
+        if (maxDistance == distanceSouth) {
+            return locationSouth;
+        }
+        if (maxDistance == distanceWest) {
+            return locationWest;
+        }
+        if (maxDistance == distanceEast) {
+            return locationEast;
+        }
+
+        return null;
     }
 
     private void setScoreText() {

@@ -1,11 +1,11 @@
 package ru.dobrovolskyn.snake.game.enums;
 
-import ru.dobrovolskyn.snake.game.SnakeGame;
+import ru.dobrovolskyn.snake.game.util.Utils;
 
 public enum FrogsMoveTime {
-    RED(SnakeGame.getSnakeSleep() * 3),
-    GREEN(SnakeGame.getSnakeSleep() * 4),
-    BLUE(SnakeGame.getSnakeSleep() * 2);
+    RED(Utils.getSnakeSleep() * 3),
+    GREEN(Utils.getSnakeSleep() * 4),
+    BLUE(Utils.getSnakeSleep() * 2);
 
     private long moveTime;
 

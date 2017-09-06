@@ -1,7 +1,7 @@
 package ru.dobrovolskyn.snake.game.controller;
 
-import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.model.SnakeGameModel;
+import ru.dobrovolskyn.snake.game.runnable.Frog;
 import ru.dobrovolskyn.snake.game.view.SnakeGameFrame;
 
 import javax.swing.*;
