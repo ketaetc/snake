@@ -55,9 +55,9 @@ public class Frog extends GameObject {
         int generationCounter = 0;
         boolean interrupted = false;
         Point newLocation;
-        Point direction = getDirection();
+        Point direction;
 
-        if (getDistanceTo(model.getSnake().getSnakeHeadLocation()) > 4) {
+        if (getDistanceTo(model.getSnake().getSnakeHeadLocation()) > 4 * SnakeGameModel.getSquareWidth()) {
             direction = generateNewPoint(randomValue);
             int x = location.x + direction.x;
             int y = location.y + direction.y;
