@@ -17,5 +17,8 @@
 - three types of frogs added: red, green, blue;
 - frogs with some probability trying to escape from the snake, if the distance is less than 4, otherwise they are going to the random neighboring cells.
 
+## Command line arguments example:
+- java -jar Snake.jar -height 11 -width 11 -length 3 -frogs 2 -sleep 1000
+
 ## Author:
     - Nicholas Dobrovolsky (Николай Добровольский), email dobrovolskyn@gmail.com
